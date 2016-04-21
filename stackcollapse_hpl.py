@@ -51,7 +51,6 @@ def parse_hpl(filename):
             marker_str = fh.read(1)
             if not marker_str:
                 break
-
             (marker,) = struct.unpack('>b', marker_str)
             if marker == 0:
                 break
@@ -68,6 +67,10 @@ def parse_hpl(filename):
                 class_name = parse_hpl_string(fh)
                 method_name = parse_hpl_string(fh)
                 methods[method_id] = Method(method_id, file_name, class_name, method_name)
+            elif marker == 21:
+                (bci, line_no, method_id) = struct.unpack('>iiQ', fh.read(4 + 4 + 8))
+                frame = Frame(line_no, method_id)
+                traces[-1].frames.append(frame)
             else:
                 raise Exception("Unexpected marker: %s at offset %s" % (marker, fh.tell()))
 
